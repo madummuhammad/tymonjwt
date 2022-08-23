@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Validator;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
@@ -29,7 +30,7 @@ class AuthController extends Controller
         $password=Hash::make($request->password);
         User::create(['username'=>$username,'password'=>$password]);
 
-        return response()->json(['message'=>'success']);
+        return response()->json(['success'=>'success','message'=>'Anda berhasil daftar']);
     }
 
     /**
@@ -37,15 +38,24 @@ class AuthController extends Controller
      *
      * @return \Illuminate\Http\JsonResponse
      */
-    public function login()
+    public function login(Request $request)
     {
+        $validated=Validator::make($request->all(),[
+            'username'=>'required',
+            'password'=>'required'
+        ]);
+
+        if ($validated->fails()) {
+            return response()->json(['status'=>'gagal','message'=>'Masukan email/password dengan benar']);
+        }
         $credentials = request(['username', 'password']);
 
         if (! $token = auth()->attempt($credentials)) {
-            return response()->json(['error' => 'Unauthorized'], 401);
+            return response()->json(['status'=>'gagal','message'=>'Masukan email/password dengan benar'], 401);
         }
 
         return $this->respondWithToken($token);
+        // return response()->json(['status'=>request('username')]);
     }
 
     /**
@@ -90,6 +100,7 @@ class AuthController extends Controller
     protected function respondWithToken($token)
     {
         return response()->json([
+            'status'=>'success',
             'access_token' => $token,
             'token_type' => 'bearer',
             'expires_in' => auth()->factory()->getTTL() * 60

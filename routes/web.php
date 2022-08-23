@@ -20,8 +20,3 @@ $router->get('/', function () use ($router) {
 $router->group(['prefix'=>'api','middleware'=>'auth'],function($router){
     $router->get('me','AuthController@me');
 });
-
-$router->group(['prefix'=>'auth'],function($router){
-$router->post('register','AuthController@register');
-$router->post('login','AuthController@login');
-});
